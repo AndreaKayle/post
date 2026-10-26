@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Postboard: content calendar for creators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4fb;--surface:#fff;--ink:#1d1b3a;--mute:#6b6891;--line:#e1def0;--accent:#ff3d7f;
+--s-idea:#8d8aab;--s-filming:#f2a007;--s-editing:#7b61ff;--s-scheduled:#12a594;--s-posted:#2f9e44;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#14122b;--surface:#1e1b3d;--ink:#f1effc;--mute:#9d9ac4;--line:#33305a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14122b;--surface:#1e1b3d;--ink:#f1effc;--mute:#9d9ac4;--line:#33305a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 'Bricolage Grotesque',system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.02em}
+.logo i{font-style:normal;color:var(--accent)}
+header p{margin:0;color:var(--mute);font-size:13px}
+main{max-width:1100px;margin:0 auto;padding:20px}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.03em}
+.nav{display:flex;gap:6px;align-items:center}
+.nav button,.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.sw{width:10px;height:10px;border-radius:50%;flex:none}
+.hint{color:var(--mute);font-size:13px;margin:0 0 12px}
+.scroll{overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-width:700px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--line);gap:1px}
+.dow{background:var(--bg);padding:8px;font-weight:600;color:var(--mute);font-size:13px}
+.day{background:var(--surface);min-height:112px;padding:6px;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.day.off{background:var(--bg)}
+.day:hover{outline:2px solid var(--accent);outline-offset:-2px}
+.day .n{font-size:13px;color:var(--mute);font-weight:600}
+.day.today .n{background:var(--accent);color:#fff;border-radius:999px;padding:0 7px;align-self:flex-start}
+.card{display:block;text-align:left;border:0;border-left:4px solid var(--c);background:var(--bg);border-radius:6px;padding:4px 6px;cursor:pointer;width:100%;font-size:12.5px;line-height:1.3}
+.card b{display:block;font-weight:600}
+.card small{color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);padding:22px;width:min(480px,94vw)}
+dialog::backdrop{background:rgba(10,8,30,.55)}
+dialog h2{margin:0 0 14px;font-size:22px;letter-spacing:-.02em}
+label{display:block;font-weight:600;font-size:13px;margin:12px 0 4px}
+input,textarea,select.f{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+textarea{resize:vertical;min-height:70px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.links{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.links a{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;color:var(--ink);text-decoration:none;background:var(--bg);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.links a span{color:var(--accent);font-weight:800}
+.acts{display:flex;gap:8px;justify-content:space-between;margin-top:18px}
+footer{max-width:1100px;margin:0 auto;padding:0 20px 28px;color:var(--mute);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer button{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;padding:0}
+button:focus-visible,.day:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">post<i>board</i></div>
+  <p>Plan your content. Keep your inspo next to it.</p>
+</header>
+<main>
+  <div class="bar">
+    <h1 id="month"></h1>
+    <div class="nav">
+      <button id="prev" aria-label="Previous month">‹</button>
+      <button id="today">Today</button>
+      <button id="next" aria-label="Next month">›</button>
+      <button class="btn pri" id="add">Add content</button>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <p class="hint" id="hint"></p>
+  <div class="scroll"><div class="grid" id="grid"></div></div>
+</main>
+<footer>
+  <span>Your calendar is saved in this browser only.</span>
+  <button id="clear">Clear all content</button>
+</footer>
+
+<dialog id="dlg">
+  <h2 id="dTitle">Add content</h2>
+  <label for="fTitle">Title</label>
+  <input id="fTitle" placeholder="e.g. GRWM for the weekend">
+  <div class="row">
+    <div><label for="fDate">Post date</label><input id="fDate" type="date"></div>
+    <div><label for="fStatus">Status</label><select id="fStatus" class="f"></select></div>
+  </div>
+  <label for="fTag">Format</label>
+  <input id="fTag" list="tags" placeholder="e.g. GRWM, storytime, trend">
+  <datalist id="tags"><option value="GRWM"><option value="Storytime"><option value="Trend"><option value="Tutorial"><option value="Day in my life"></datalist>
+  <label for="fNotes">Notes</label>
+  <textarea id="fNotes" placeholder="Hook, caption ideas, sounds to use"></textarea>
+  <label for="fLinks">Inspo links (one TikTok link per line)</label>
+  <textarea id="fLinks" placeholder="https://www.tiktok.com/@user/video/123"></textarea>
+  <div class="links" id="linkList"></div>
+  <div class="acts">
+    <button class="btn" id="del">Delete</button>
+    <div style="display:flex;gap:8px"><button class="btn" id="cancel">Cancel</button><button class="btn pri" id="save">Save</button></div>
+  </div>
+</dialog>
+
+<script>
+const KEY='postboard-solo-v1';
+const statuses=['idea','filming','editing','scheduled','posted'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const now=new Date();let view=new Date(now.getFullYear(),now.getMonth(),1);
+const at=n=>iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()+n));
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const col=s=>'var(--s-'+s+')';
+const handle=u=>{const m=u.match(/@([\w.]+)/);return m?'@'+m[1]:(u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0]||u)};
+
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return null}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(slots))}catch(e){}}
+const seed=()=>[
+ {id:1,title:'Get ready with me: weekend edition',date:at(2),status:'filming',tag:'GRWM',notes:'Open with the outfit reveal. Use a trending sound.',links:['https://www.tiktok.com/@example/video/7301']},
+ {id:2,title:'3 things I wish I knew when I started',date:at(4),status:'idea',tag:'Storytime',notes:'Keep it under 30 seconds.',links:[]},
+ {id:3,title:'Day in my life as a creator',date:at(7),status:'idea',tag:'Day in my life',notes:'',links:[]},
+ {id:4,title:'Quick editing tutorial',date:at(-2),status:'posted',tag:'Tutorial',notes:'',links:[]}
+];
+let slots=load()||seed(),uid=Math.max(10,...slots.map(s=>s.id))+1,filter='all',editId=null;
+
+function render(){
+  $('month').textContent=view.toLocaleString('en',{month:'long',year:'numeric'});
+  $('chips').innerHTML=['all'].concat(statuses).map(s=>`<button class="chip" data-f="${s}" aria-pressed="${filter===s}">${s==='all'?'':`<span class="sw" style="background:${col(s)}"></span>`}${cap(s)}</button>`).join('');
+  const inMonth=slots.filter(s=>s.date.slice(0,7)===view.getFullYear()+'-'+String(view.getMonth()+1).padStart(2,'0'));
+  $('hint').textContent=inMonth.length?`${inMonth.length} planned this month. Click a day to add content, or a card to edit it.`:'Nothing planned this month yet. Click a day to add your first idea.';
+  const first=new Date(view.getFullYear(),view.getMonth(),1),start=new Date(first);start.setDate(1-first.getDay());
+  const vis=slots.filter(s=>filter==='all'||s.status===filter);
+  let h=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    if(i>=35&&d.getMonth()!==view.getMonth())break;
+    const k=iso(d),items=vis.filter(s=>s.date===k);
+    h+=`<div class="day${d.getMonth()!==view.getMonth()?' off':''}${k===iso(now)?' today':''}" data-d="${k}" tabindex="0"><span class="n">${d.getDate()}</span>${items.map(s=>`<button class="card" data-id="${s.id}" style="--c:${col(s.status)}"><b>${esc(s.title)}</b><small>${cap(s.status)}${s.tag?' · '+esc(s.tag):''}${s.links.length?' · '+s.links.length+' inspo':''}</small></button>`).join('')}</div>`;
+  }
+  $('grid').innerHTML=h;
+}
+
+function renderLinks(){
+  $('linkList').innerHTML=$('fLinks').value.split('\n').map(x=>x.trim()).filter(x=>/^https?:\/\//.test(x))
+   .map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><span>▶</span>${esc(handle(u))}</a>`).join('');
+}
+
+function openDlg(slot,date){
+  editId=slot?slot.id:null;
+  $('dTitle').textContent=slot?'Edit content':'Add content';
+  $('fStatus').innerHTML=statuses.map(s=>`<option value="${s}">${cap(s)}</option>`).join('');
+  $('fTitle').value=slot?slot.title:'';
+  $('fDate').value=slot?slot.date:date;
+  $('fStatus').value=slot?slot.status:'idea';
+  $('fTag').value=slot?slot.tag||'':'';
+  $('fNotes').value=slot?slot.notes:'';
+  $('fLinks').value=slot?slot.links.join('\n'):'';
+  $('del').style.visibility=slot?'visible':'hidden';
+  renderLinks();$('dlg').showModal();$('fTitle').focus();
+}
+
+$('fLinks').addEventListener('input',renderLinks);
+$('cancel').onclick=()=>$('dlg').close();
+$('save').onclick=()=>{
+  const t=$('fTitle').value.trim();if(!t){$('fTitle').focus();return}
+  const data={title:t,date:$('fDate').value||iso(now),status:$('fStatus').value,tag:$('fTag').value.trim(),notes:$('fNotes').value.trim(),
+    links:$('fLinks').value.split('\n').map(x=>x.trim()).filter(Boolean)};
+  if(editId){Object.assign(slots.find(s=>s.id===editId),data)}else{slots.push({id:uid++,...data})}
+  persist();$('dlg').close();render();
+};
+$('del').onclick=()=>{slots=slots.filter(s=>s.id!==editId);persist();$('dlg').close();render()};
+$('grid').addEventListener('click',e=>{
+  const c=e.target.closest('.card');
+  if(c){openDlg(slots.find(s=>s.id==c.dataset.id));return}
+  const d=e.target.closest('.day');if(d)openDlg(null,d.dataset.d);
+});
+$('grid').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('day'))openDlg(null,e.target.dataset.d)});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b){filter=b.dataset.f;render()}});
+$('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
+$('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
+$('today').onclick=()=>{view=new Date(now.getFullYear(),now.getMonth(),1);render()};
+$('add').onclick=()=>openDlg(null,iso(now));
+$('clear').onclick=()=>{if(confirm('Delete all content from this calendar?')){slots=[];persist();render()}};
+render();
+</script>
+</body>
+</html>
